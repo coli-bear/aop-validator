@@ -1,6 +1,9 @@
-package com.colibear.framwork.validation.core;
+package com.colibear.framwork.validation.core.checker;
+
+import com.colibear.framwork.validation.annotation.Payload;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface StringChecker {
     static boolean notBlank(String str) {
@@ -42,4 +45,6 @@ public interface StringChecker {
 
         return true;
     }
+
+    List<String> stringValidation(Payload payload, String str);
 }

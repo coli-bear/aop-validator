@@ -1,4 +1,8 @@
-package com.colibear.framwork.validation.core;
+package com.colibear.framwork.validation.core.checker;
+
+import com.colibear.framwork.validation.annotation.Payload;
+
+import java.util.List;
 
 public interface EmailChecker {
 
@@ -14,6 +18,5 @@ public interface EmailChecker {
         return true;
     }
 
-
-
+    List<String> emailValidation(Payload payload, String email);
 }

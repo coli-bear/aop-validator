@@ -1,10 +1,10 @@
 package com.colibear.framwork.validation.core;
 
 import com.colibear.framwork.validation.annotation.Payload;
-import com.colibear.framwork.validation.enums.ErrorCode;
+import com.colibear.framwork.validation.core.checker.AllPayloadChecker;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,17 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AllPayLoadValidator implements PayloadValidator {
+public class DefaultPayloadValidator implements PayloadValidator {
+
+    @Autowired
+    private AllPayloadChecker allPayloadChecker;
 
     @Override
-    public Map<String, String> valid(Field[] fields, Object obj) {
+    public Map<String, List<String>> valid(Field[] fields, Object obj) {
 
-        Map<String, String> invalidMap = new ConcurrentHashMap<>();
+        Map<String, List<String>> invalidMap = new ConcurrentHashMap<>();
 
         Arrays.stream(fields).forEach(field -> {
             Payload payload = field.getAnnotation(Payload.class);
             try {
-                validObject(field, obj, payload);
+                invalidMap.putAll(validObject(field, obj, payload));
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -35,27 +38,10 @@ public class AllPayLoadValidator implements PayloadValidator {
 
         Map<String, List<String>> invalidsMap = new HashMap<>();
         if (o instanceof Collection) {
-            List<String> invalids = collectionValidation(payload, (Collection) field.get(obj));
+            List<String> invalids = allPayloadChecker.collectionValidation(payload, (Collection) field.get(obj));
             invalidsMap.put(field.getName(), invalids);
         }
 
         return invalidsMap;
-    }
-
-    private List<String> collectionValidation(Payload payload, Collection collection) {
-        List<String> invalids = new ArrayList<>();
-        if (payload.notnull()) {
-            if (NullChecker.isNull(collection)) {
-                invalids.add(ErrorCode.NOT_NULL.getValue());
-            }
-        }
-
-        if (!payload.empty()) {
-            if (IterChecker.isEmpty(collection)) {
-                invalids.add(ErrorCode.NOT_EMPTY.getValue());
-            }
-        }
-
-        return invalids;
     }
 }
